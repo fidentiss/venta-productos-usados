@@ -10,7 +10,13 @@ function ContactModal({ open, onClose }) {
       <DialogContent>
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="h6" sx={{ color: '#555', marginBottom: 2 }}>
-            Welcome to my personal site
+            ¡Bienvenido a mi sitio personal!
+          </Typography>
+          <Typography variant="body1" sx={{ color: '#555', marginBottom: 2 }}>
+            Esta página web la creé para practicar mis habilidades en React y para vender algunas cosas que ya no necesito.
+          </Typography>
+          <Typography variant="body1" sx={{ color: '#555', marginBottom: 2 }}>
+            Si quieres saber más sobre mí, ingresa a mi sitio web personal.
           </Typography>
           <Typography
             variant="body1"
@@ -30,7 +36,7 @@ function ContactModal({ open, onClose }) {
           variant="contained"
           sx={{ borderRadius: 50, padding: '6px 24px', backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#155a9e' } }}
         >
-          Close
+          Cerrar
         </Button>
       </DialogActions>
     </Dialog>
