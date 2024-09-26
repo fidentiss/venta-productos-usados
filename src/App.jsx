@@ -42,7 +42,7 @@ const products = [
   { 
     id: 3, 
     name: "Longboard con trucks y llantas", 
-    price: 1299, 
+    price: "130.000", 
     description: "Potente laptop para profesionales y creativos.",
     images: [
       "/assets/images/longboard-completa-1.jpg",

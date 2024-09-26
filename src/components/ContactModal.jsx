@@ -10,7 +10,7 @@ function ContactModal({ open, onClose }) {
       <DialogContent>
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="h6" sx={{ color: '#555', marginBottom: 2 }}>
-            ¡Bienvenido a mi sitio personal!
+            ¡Bienvenido a mi sitio de Venta de Usados!
           </Typography>
           <Typography variant="body1" sx={{ color: '#555', marginBottom: 2 }}>
             Esta página web la creé para practicar mis habilidades en React y para vender algunas cosas que ya no necesito.
