@@ -42,8 +42,7 @@ function Header() {
               Josephc.site
             </LogoText>
             <Box>
-              <NavButton>Inicio</NavButton>
-              <NavButton onClick={handleOpenContactModal}>Contacto</NavButton>
+              <NavButton onClick={handleOpenContactModal}>Contacto y Condiciones*</NavButton>
             </Box>
           </Toolbar>
         </AppBar>

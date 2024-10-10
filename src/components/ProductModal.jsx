@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Grid, styled, TextField, InputAdornment, useMediaQuery, useTheme, IconButton } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Grid, styled, TextField, InputAdornment, useMediaQuery, useTheme, IconButton, Snackbar, Alert } from '@mui/material';
 import { Carousel } from 'react-responsive-carousel';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -25,7 +25,7 @@ const StyledDialog = styled(Dialog)(({ theme }) => ({
     borderRadius: '12px',
     padding: theme.spacing(2),
     width: '100%',
-    maxWidth: 600,
+    maxWidth: 700,  // Hacemos el modal más ancho
     [theme.breakpoints.down('sm')]: {
       padding: theme.spacing(1),
       maxWidth: '95%',
@@ -39,28 +39,25 @@ const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   WebkitTextFillColor: 'transparent',
   fontWeight: 700,
   textAlign: 'center',
-  fontSize: '1.5rem',
+  fontSize: '1.8rem', // Tamaño de fuente mayor
   [theme.breakpoints.down('sm')]: {
-    fontSize: '1.2rem',
-  },
-  [theme.breakpoints.down('xs')]: {
-    fontSize: '1rem',
+    fontSize: '1.5rem',
   },
 }));
 
 const StyledCarousel = styled(Carousel)(({ theme }) => ({
   '& .slide img': {
-    maxHeight: '400px',
+    maxHeight: '450px', // Más espacio para las imágenes
     objectFit: 'contain',
     [theme.breakpoints.down('sm')]: {
-      maxHeight: '250px',
+      maxHeight: '300px',
     },
     [theme.breakpoints.down('xs')]: {
       maxHeight: '200px',
     },
   },
   '& .legend': {
-    background: 'rgba(0, 0, 0, 0.5)',
+    background: 'rgba(0, 0, 0, 0.7)', // Un fondo más oscuro para mejor visibilidad
     bottom: '40px',
     position: 'absolute',
     width: '100%',
@@ -81,6 +78,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   height: 48,
   padding: '0 30px',
   textTransform: 'none',
+  fontSize: '1rem',
   '&:hover': {
     background: 'linear-gradient(45deg, #FE6B8B 60%, #FF8E53 90%)',
   },
@@ -145,6 +143,9 @@ function ProductModal({ product, open, onClose, onBuy }) {
   const [whatsapp, setWhatsapp] = useState('');
   const [offerError, setOfferError] = useState('');
   const [fullscreenImage, setFullscreenImage] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isExtraSmall = useMediaQuery(theme.breakpoints.down('xs'));
@@ -158,13 +159,13 @@ function ProductModal({ product, open, onClose, onBuy }) {
   const handleOfferChange = (e) => {
     let value = unformatNumber(e.target.value);
     if (!/^\d*$/.test(value)) return;
-    
+
     if (value === '' || parseInt(value) >= 20000) {
       setOfferError('');
     } else {
       setOfferError('La oferta mínima es de $20.000');
     }
-    
+
     setOffer(formatNumber(value));
   };
 
@@ -180,7 +181,7 @@ function ProductModal({ product, open, onClose, onBuy }) {
       setOfferError('La oferta mínima es de $20.000');
       return;
     }
-  
+
     try {
       const response = await fetch('/api/send-offer', {
         method: 'POST',
@@ -193,23 +194,30 @@ function ProductModal({ product, open, onClose, onBuy }) {
           whatsapp: whatsapp,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error('Error al enviar la oferta');
       }
-  
+
       const data = await response.json();
       if (data.success) {
         setOfferModalOpen(false);
         setOffer('');
         setWhatsapp('');
         setOfferError('');
+        setSnackbarMessage('Oferta enviada correctamente. Te contactaremos por WhatsApp si es aceptada.');
+        setSnackbarSeverity('success');
       } else {
         console.error('Error:', data.message);
+        setSnackbarMessage('Hubo un error al enviar la oferta.');
+        setSnackbarSeverity('error');
       }
     } catch (error) {
       console.error('Error enviando la oferta:', error);
+      setSnackbarMessage('Hubo un error al enviar la oferta.');
+      setSnackbarSeverity('error');
     }
+    setSnackbarOpen(true);  // Abre el Snackbar
   };
 
   const handleImageClick = (imageUrl) => {
@@ -218,6 +226,13 @@ function ProductModal({ product, open, onClose, onBuy }) {
 
   const handleCloseFullscreen = () => {
     setFullscreenImage(null);
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
   };
 
   return (
@@ -245,56 +260,57 @@ function ProductModal({ product, open, onClose, onBuy }) {
               </StyledCarousel>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="body1" sx={{ 
-                mt: isMobile ? 1 : 2, 
+              <Typography variant="body1" sx={{
+                mt: isMobile ? 1 : 2,
                 textAlign: isMobile ? 'center' : 'left',
                 fontSize: isExtraSmall ? '0.9rem' : '1rem'
               }}>
                 {product.description}
               </Typography>
-              <Typography variant="h5" sx={{ 
-                mt: isMobile ? 1 : 2, 
-                color: '#FE6B8B', 
+              <Typography variant="h5" sx={{
+                mt: isMobile ? 1 : 2,
+                color: '#FE6B8B',
                 textAlign: isMobile ? 'center' : 'left',
                 fontSize: isExtraSmall ? '1.2rem' : '1.5rem'
               }}>
-                Precio: ${product.price}
+                Precio: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(product.price)}
               </Typography>
+
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions sx={{ 
-          justifyContent: isMobile ? 'center' : 'space-between', 
+        <DialogActions sx={{
+          justifyContent: isMobile ? 'center' : 'space-between',
           padding: isMobile ? '8px' : '16px',
           flexDirection: isMobile ? 'column' : 'row',
           alignItems: 'center',
           gap: isMobile ? '8px' : '0'
         }}>
-          <Button 
-            onClick={onClose} 
-            variant="outlined" 
-            sx={{ 
-              color: '#FE6B8B', 
+          <Button
+            onClick={onClose}
+            variant="outlined"
+            sx={{
+              color: '#FE6B8B',
               borderColor: '#FE6B8B',
               width: isMobile ? '100%' : 'auto'
             }}
           >
             Cerrar
           </Button>
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
             width: isMobile ? '100%' : 'auto',
             gap: isMobile ? '8px' : '16px'
           }}>
-            <StyledButton 
-              onClick={handleMakeOffer} 
+            <StyledButton
+              onClick={handleMakeOffer}
               sx={{ width: isMobile ? '100%' : 'auto' }}
               startIcon={<AttachMoneyIcon />}
             >
               Hacer Oferta
             </StyledButton>
-            <StyledButton 
+            <StyledButton
               onClick={() => onBuy(product)}
               sx={{ width: isMobile ? '100%' : 'auto' }}
               startIcon={<ShoppingCartIcon />}
@@ -305,8 +321,8 @@ function ProductModal({ product, open, onClose, onBuy }) {
         </DialogActions>
       </StyledDialog>
 
-      <Dialog 
-        open={offerModalOpen} 
+      <Dialog
+        open={offerModalOpen}
         onClose={() => setOfferModalOpen(false)}
         PaperProps={{
           style: {
@@ -379,6 +395,17 @@ function ProductModal({ product, open, onClose, onBuy }) {
           <StyledFullScreenImage src={fullscreenImage} alt="Imagen en pantalla completa" />
         </FullScreenImage>
       )}
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={15000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
