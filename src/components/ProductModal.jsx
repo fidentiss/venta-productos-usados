@@ -69,6 +69,22 @@ const StyledCarousel = styled(Carousel)(({ theme }) => ({
   },
 }));
 
+const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
+  maxHeight: '400px', // Limita la altura del contenido para que se active el scroll
+  overflowY: 'auto',  // Asegura que el contenido sea desplazable cuando es necesario
+  '&::-webkit-scrollbar': {
+    width: '8px',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: '#FE6B8B', // Color del scroll para mayor visibilidad
+    borderRadius: '4px',
+  },
+  '&::-webkit-scrollbar-track': {
+    backgroundColor: '#2C2C2C', // Fondo del track del scroll
+  },
+  boxShadow: 'inset 0px -15px 10px -10px rgba(0,0,0,0.5)',  // Sombra en la parte inferior para indicar más contenido
+}));
+
 const StyledButton = styled(Button)(({ theme }) => ({
   background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
   border: 0,
@@ -239,7 +255,7 @@ function ProductModal({ product, open, onClose, onBuy }) {
     <>
       <StyledDialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <StyledDialogTitle>{product.name}</StyledDialogTitle>
-        <DialogContent>
+        <StyledDialogContent>
           <Grid container spacing={isMobile ? 1 : 2}>
             <Grid item xs={12}>
               <StyledCarousel
@@ -278,7 +294,7 @@ function ProductModal({ product, open, onClose, onBuy }) {
 
             </Grid>
           </Grid>
-        </DialogContent>
+        </StyledDialogContent>
         <DialogActions sx={{
           justifyContent: isMobile ? 'center' : 'space-between',
           padding: isMobile ? '8px' : '16px',
